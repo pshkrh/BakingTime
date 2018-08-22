@@ -1,10 +1,8 @@
-package com.pshkrh.bakingtime;
+package com.pshkrh.bakingtime.Activity;
 
 import android.content.Context;
-import android.graphics.Movie;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,9 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -23,12 +19,12 @@ import com.pshkrh.bakingtime.Adapter.RecipeAdapter;
 import com.pshkrh.bakingtime.Model.Ingredient;
 import com.pshkrh.bakingtime.Model.Recipe;
 import com.pshkrh.bakingtime.Model.Step;
+import com.pshkrh.bakingtime.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
@@ -90,15 +86,18 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray ingredientsList = recipejson.getJSONArray("ingredients");
                             JSONArray stepsList = recipejson.getJSONArray("steps");
 
+                            mIngredients = new ArrayList<>();
                             for(int j=0;j<ingredientsList.length();j++){
                                 JSONObject ingredientJson = ingredientsList.getJSONObject(j);
                                 int quantity = ingredientJson.getInt("quantity");
                                 String measure = ingredientJson.getString("measure");
                                 String ingredientName = ingredientJson.getString("ingredient");
+                                Log.d(TAG,"Ingredients of item " + String.valueOf(j) + " = " + String.valueOf(quantity) + measure + ingredientName);
                                 Ingredient ingredient = new Ingredient(quantity,measure,ingredientName);
                                 mIngredients.add(ingredient);
                             }
 
+                            mSteps = new ArrayList<>();
                             for(int j=0;j<stepsList.length();j++){
                                 JSONObject stepsJson = stepsList.getJSONObject(j);
                                 int stepId = stepsJson.getInt("id");
@@ -113,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
 
                             Recipe recipe = new Recipe(recipeId,recipeName,mIngredients,mSteps);
                             mRecipes.add(recipe);
-
                         }
 
                         RecipeAdapter recipeAdapter = new RecipeAdapter(mRecipes);
