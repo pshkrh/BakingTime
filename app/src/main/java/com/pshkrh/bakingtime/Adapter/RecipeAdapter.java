@@ -1,18 +1,21 @@
 package com.pshkrh.bakingtime.Adapter;
 
 import android.content.Context;
-import android.support.design.widget.Snackbar;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.pshkrh.bakingtime.Model.Ingredient;
 import com.pshkrh.bakingtime.Model.Recipe;
+import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
+import com.pshkrh.bakingtime.Activity.RecipeActivity;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class RecipeAdapter extends
         RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
@@ -30,14 +33,25 @@ public class RecipeAdapter extends
         public void onClick(View view) {
             int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-                Snackbar.make(itemView,"Intent Goes Here!",Snackbar.LENGTH_SHORT).show();
+
+                Recipe recipe = mRecipes.get(position);
+                ArrayList<Ingredient> ingredientArrayList = recipe.getIngredients();
+                ArrayList<Step> stepArrayList = recipe.getSteps();
+
+                Intent intent = new Intent(view.getContext(), RecipeActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("Ingredients",ingredientArrayList);
+                bundle.putParcelableArrayList("Steps",stepArrayList);
+                //bundle.putInt("Position",position);
+                intent.putExtra("IngredientStepBundle",bundle);
+                view.getContext().startActivity(intent);
             }
         }
     }
 
-    private List<Recipe> mRecipes;
+    private ArrayList<Recipe> mRecipes;
 
-    public RecipeAdapter(List<Recipe> recipes) {
+    public RecipeAdapter(ArrayList<Recipe> recipes) {
         mRecipes = recipes;
     }
 
