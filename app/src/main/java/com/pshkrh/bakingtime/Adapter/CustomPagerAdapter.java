@@ -12,7 +12,7 @@ import com.pshkrh.bakingtime.Model.Step;
 import java.util.ArrayList;
 
 
-public class CustomPagerAdapter extends FragmentPagerAdapter {
+public class CustomPagerAdapter extends FragmentStatePagerAdapter {
 
     private Bundle stepsBundle;
 
