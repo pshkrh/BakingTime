@@ -9,31 +9,39 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
-
 import java.util.ArrayList;
 
 public class StepListAdapter extends
         RecyclerView.Adapter<StepListAdapter.ViewHolder> {
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView nameTextView;
+    public interface OnStepClickListener {
+        void onStepSelected(View view, int position);
+    }
 
-        public ViewHolder(View itemView) {
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private TextView nameTextView;
+        private OnStepClickListener mStepClickListener;
+
+        public ViewHolder(View itemView, OnStepClickListener stepClickListener) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.ingredient_step_name);
+            mStepClickListener = stepClickListener;
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            Snackbar.make(view,"Intent Goes Here!",Snackbar.LENGTH_SHORT);
+            mStepClickListener.onStepSelected(view,getAdapterPosition());
         }
     }
 
     private ArrayList<Step> mSteps;
+    private OnStepClickListener mStepClickListener;
 
-    public StepListAdapter(ArrayList<Step> steps) {
+    public StepListAdapter(ArrayList<Step> steps,OnStepClickListener listener) {
         mSteps = steps;
+        mStepClickListener = listener;
     }
 
     @Override
@@ -41,26 +49,20 @@ public class StepListAdapter extends
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
-        // Inflate the custom layout
         View stepView = inflater.inflate(R.layout.ingredient_step_item, parent, false);
 
-        // Return a new holder instance
-        ViewHolder viewHolder = new ViewHolder(stepView);
+        ViewHolder viewHolder = new ViewHolder(stepView,mStepClickListener);
         return viewHolder;
     }
 
-    // Involves populating data into the item through holder
     @Override
     public void onBindViewHolder(StepListAdapter.ViewHolder viewHolder, int position) {
-        // Get the data model based on position
         Step step = mSteps.get(position);
 
-        // Set item views based on your views and data model
         TextView textView = viewHolder.nameTextView;
         textView.setText(step.getShortDesc());
     }
 
-    // Returns the total count of items in the list
     @Override
     public int getItemCount() {
         if(mSteps!=null)
