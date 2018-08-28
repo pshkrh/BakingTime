@@ -4,11 +4,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
 import java.util.ArrayList;
@@ -24,7 +28,7 @@ public class DetailsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_details,container,false);
 
-        Bundle bundle = this.getArguments();
+        final Bundle bundle = this.getArguments();
         mSteps = bundle.getParcelableArrayList("Steps");
         int position = bundle.getInt("Position");
         String desc = mSteps.get(position).getDesc();
@@ -32,12 +36,38 @@ public class DetailsFragment extends Fragment {
        // Toast.makeText(getContext(), "Position Clicked = " + position, Toast.LENGTH_SHORT).show();
 
 
-        //SimpleExoPlayerView simpleExoPlayerView = rootView.findViewById(R.id.exoplayer);
+        PlayerControlView mPlayerView = rootView.findViewById(R.id.exoplayer);
         TextView stepDesc = rootView.findViewById(R.id.step_description);
         stepDesc.setText(desc);
 
+        final ViewPager mViewPager = getActivity().findViewById(R.id.pager);
+
         ImageButton prev = rootView.findViewById(R.id.button_prev);
         ImageButton next = rootView.findViewById(R.id.button_next);
+
+        if(position == 0){
+            prev.setVisibility(View.INVISIBLE);
+        }
+
+        if(position == mSteps.size()-1){
+            next.setVisibility(View.INVISIBLE);
+        }
+
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int pos = bundle.getInt("Position");
+                mViewPager.setCurrentItem(pos-1,true);
+            }
+        });
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int pos = bundle.getInt("Position");
+                mViewPager.setCurrentItem(pos+1,true);
+            }
+        });
 
         return rootView;
     }
