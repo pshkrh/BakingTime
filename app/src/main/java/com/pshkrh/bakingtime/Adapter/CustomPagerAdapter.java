@@ -1,10 +1,14 @@
 package com.pshkrh.bakingtime.Adapter;
 
+import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.pshkrh.bakingtime.Fragment.DetailsFragment;
 import com.pshkrh.bakingtime.Model.Step;
@@ -33,5 +37,22 @@ public class CustomPagerAdapter extends FragmentStatePagerAdapter {
             return mSteps.size();
         else
             return 0;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        container.removeView((View) object);
+    }
+
+    @Override
+    public int getItemPosition(@NonNull Object object) {
+        return POSITION_NONE;
+    }
+
+    @Override
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        if (observer != null) {
+            super.unregisterDataSetObserver(observer);
+        }
     }
 }

@@ -34,7 +34,8 @@ public class DetailsActivity extends AppCompatActivity {
         mCustomPagerAdapter = new CustomPagerAdapter(getSupportFragmentManager(),bundle);
 
         mViewPager.setAdapter(mCustomPagerAdapter);
-        mViewPager.setCurrentItem(scrollPosition,true);
+        mViewPager.setCurrentItem(scrollPosition);
+        mViewPager.setOffscreenPageLimit(2);
     }
 
     @Override

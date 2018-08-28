@@ -1,5 +1,6 @@
 package com.pshkrh.bakingtime.Fragment;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,8 +12,22 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.RenderersFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
 import java.util.ArrayList;
@@ -20,6 +35,10 @@ import java.util.ArrayList;
 public class DetailsFragment extends Fragment {
 
     public ArrayList<Step> mSteps = new ArrayList<>();
+
+    private SimpleExoPlayer mExoPlayer;
+    private PlayerControlView mPlayerControlView;
+    private long mPlayerPosition;
 
     public DetailsFragment(){}
 
@@ -36,7 +55,7 @@ public class DetailsFragment extends Fragment {
        // Toast.makeText(getContext(), "Position Clicked = " + position, Toast.LENGTH_SHORT).show();
 
 
-        PlayerControlView mPlayerView = rootView.findViewById(R.id.exoplayer);
+        mPlayerControlView = rootView.findViewById(R.id.exoplayer);
         TextView stepDesc = rootView.findViewById(R.id.step_description);
         stepDesc.setText(desc);
 
@@ -69,6 +88,8 @@ public class DetailsFragment extends Fragment {
             }
         });
 
+        initializePlayer(Uri.parse(mSteps.get(position).getVideoUrl()));
+
         return rootView;
     }
 
@@ -81,4 +102,45 @@ public class DetailsFragment extends Fragment {
         return detailsFragment;
     }
 
+    private void initializePlayer(Uri mediaUri){
+        if(mExoPlayer==null){
+            RenderersFactory renderersFactory = new DefaultRenderersFactory(getContext());
+            TrackSelector trackSelector = new DefaultTrackSelector();
+            LoadControl loadControl = new DefaultLoadControl();
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory,trackSelector,loadControl);
+            mPlayerControlView.setPlayer(mExoPlayer);
+
+            String userAgent = Util.getUserAgent(getContext(),"Recipes");
+            MediaSource mediaSource = new ExtractorMediaSource(mediaUri,new DefaultDataSourceFactory(getContext(),userAgent),
+                    new DefaultExtractorsFactory(),
+                    null,null);
+
+            mExoPlayer.prepare(mediaSource);
+            mExoPlayer.setPlayWhenReady(true);
+        }
+    }
+
+    private void releasePlayer(){
+        mExoPlayer.stop();
+        mExoPlayer.release();
+        mExoPlayer = null;
+    }
+
+    @Override
+    public void onStop() {
+        releasePlayer();
+        super.onStop();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        mPlayerPosition = mExoPlayer.getCurrentPosition();
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        mExoPlayer.seekTo(mPlayerPosition);
+        super.onViewStateRestored(savedInstanceState);
+    }
 }
