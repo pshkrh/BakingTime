@@ -39,20 +39,4 @@ public class CustomPagerAdapter extends FragmentStatePagerAdapter {
             return 0;
     }
 
-    @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        container.removeView((View) object);
-    }
-
-    @Override
-    public int getItemPosition(@NonNull Object object) {
-        return POSITION_NONE;
-    }
-
-    @Override
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        if (observer != null) {
-            super.unregisterDataSetObserver(observer);
-        }
-    }
 }
