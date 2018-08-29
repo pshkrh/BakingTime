@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,10 +47,12 @@ public class DetailsFragment extends Fragment {
 
     public ArrayList<Step> mSteps = new ArrayList<>();
 
+    private static final String TAG = "DetailsFragment";
     private SimpleExoPlayer mExoPlayer;
     private PlayerView mPlayerView;
-    private long mPlayerPosition;
+    private long mPlayerPosition = -1;
     private int position;
+
 
     public DetailsFragment(){}
 
@@ -113,18 +116,19 @@ public class DetailsFragment extends Fragment {
             }
         });
 
-        return rootView;
-    }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        if(savedInstanceState!=null){
+            mPlayerPosition = savedInstanceState.getLong("Seek");
+        }
+
+        initializePlayer(Uri.parse(mSteps.get(position).getVideoUrl()));
+
+        return rootView;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        //initializePlayer();
     }
 
     public static DetailsFragment newInstance(ArrayList<Step> mSteps, int position){
@@ -148,6 +152,12 @@ public class DetailsFragment extends Fragment {
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(render,defaultTrackSelector,loadControl);
             mPlayerView.requestFocus();
             mPlayerView.setPlayer(mExoPlayer);
+            if(mPlayerPosition != -1){
+                mExoPlayer.seekTo(mPlayerPosition);
+            }
+            else{
+                mExoPlayer.seekTo(0);
+            }
 
             DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter();
             DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
@@ -157,6 +167,7 @@ public class DetailsFragment extends Fragment {
 
             mExoPlayer.prepare(videoSource);
             mExoPlayer.setPlayWhenReady(true);
+            mPlayerView.hideController();
 
         }
     }
@@ -166,22 +177,29 @@ public class DetailsFragment extends Fragment {
             mExoPlayer.setPlayWhenReady(false);
             mExoPlayer.stop();
             mExoPlayer.release();
-            mExoPlayer = null;
         }
+        mExoPlayer = null;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(mExoPlayer==null){
-            initializePlayer(Uri.parse(mSteps.get(position).getVideoUrl()));
-        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        releasePlayer();
+        if(Util.SDK_INT <= 23){
+            releasePlayer();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(Util.SDK_INT > 23){
+            releasePlayer();
+        }
     }
 
     @Override
@@ -200,21 +218,10 @@ public class DetailsFragment extends Fragment {
         super.onSaveInstanceState(outState);
         if(mExoPlayer!=null && mExoPlayer.getPlayWhenReady()) {
             mPlayerPosition = mExoPlayer.getCurrentPosition();
+            Log.d(TAG,"Player position onSaveInstanceState = " + mPlayerPosition);
             mExoPlayer.setPlayWhenReady(false);
+            outState.putLong("Seek",mPlayerPosition);
         }
-
-        //outState.putLong("Seek",mPlayerPosition);
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState!=null){
-            if(mExoPlayer!=null){
-                mExoPlayer.seekTo(mPlayerPosition);
-                mExoPlayer.setPlayWhenReady(true);
-            }
-        }
-        //mExoPlayer.seekTo(savedInstanceState.getLong("Seek"));
-    }
 }
