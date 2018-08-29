@@ -7,12 +7,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -60,8 +63,24 @@ public class DetailsFragment extends Fragment {
 
         position = bundle.getInt("Position");
         String desc = mSteps.get(position).getDesc();
-
+        String videoUrl = mSteps.get(position).getVideoUrl();
+        String photoUrl = mSteps.get(position).getThumbnailUrl();
         mPlayerView = rootView.findViewById(R.id.exoplayer);
+        ImageView recipeImage = rootView.findViewById(R.id.recipe_image);
+        if(TextUtils.isEmpty(videoUrl)) {
+            mPlayerView.setVisibility(View.GONE);
+            recipeImage.setVisibility(View.VISIBLE);
+            if(!TextUtils.isEmpty(photoUrl)){
+                    Glide.with(getContext())
+                            .load(photoUrl)
+                            .into(recipeImage);
+            }
+            else {
+                    Glide.with(getContext())
+                            .load(R.drawable.oven)
+                            .into(recipeImage);
+            }
+        }
         TextView stepDesc = rootView.findViewById(R.id.step_description);
         stepDesc.setText(desc);
 
