@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pshkrh.bakingtime.Activity.DetailsActivity;
+import com.pshkrh.bakingtime.Activity.MainActivity;
 import com.pshkrh.bakingtime.Activity.RecipeActivity;
 import com.pshkrh.bakingtime.Adapter.IngredientListAdapter;
 import com.pshkrh.bakingtime.Adapter.StepListAdapter;
@@ -26,6 +27,7 @@ import com.pshkrh.bakingtime.Model.Ingredient;
 import com.pshkrh.bakingtime.Model.Recipe;
 import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
+import com.pshkrh.bakingtime.Widget.UpdateWidgetService;
 
 import java.util.ArrayList;
 
@@ -78,6 +80,11 @@ public class RecipeFragment extends Fragment implements StepListAdapter.OnStepCl
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
     }
@@ -92,4 +99,5 @@ public class RecipeFragment extends Fragment implements StepListAdapter.OnStepCl
         intent.putExtras(bundle);
         startActivity(intent);
     }
+
 }
