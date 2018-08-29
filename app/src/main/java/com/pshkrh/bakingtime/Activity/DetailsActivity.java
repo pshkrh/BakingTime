@@ -1,6 +1,5 @@
 package com.pshkrh.bakingtime.Activity;
 
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -8,11 +7,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.pshkrh.bakingtime.Adapter.CustomPagerAdapter;
-import com.pshkrh.bakingtime.Fragment.DetailsFragment;
-import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
-
-import java.util.ArrayList;
 
 public class DetailsActivity extends AppCompatActivity {
 
