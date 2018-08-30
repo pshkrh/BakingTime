@@ -94,9 +94,10 @@ public class RecipeFragment extends Fragment implements StepListAdapter.OnStepCl
         //Toast.makeText(getActivity(), "Position = " + position, Toast.LENGTH_SHORT).show();
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList("Steps",mSteps);
-        bundle.putInt("Position",position);
+        bundle.putInt("FragmentPosition",position);
         Intent intent = new Intent(getActivity(), DetailsActivity.class);
         intent.putExtras(bundle);
+        intent.putExtra("Flag",1);
         startActivity(intent);
     }
 

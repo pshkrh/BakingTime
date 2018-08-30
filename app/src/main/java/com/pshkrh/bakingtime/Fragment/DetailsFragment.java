@@ -51,8 +51,9 @@ public class DetailsFragment extends Fragment {
     private SimpleExoPlayer mExoPlayer;
     private PlayerView mPlayerView;
     private long mPlayerPosition = -1;
-    private int position;
-
+    private int mFragmentPosition = 0;
+    private boolean mMoving;
+    private DetailsFragment detailsFragment;
 
     public DetailsFragment(){}
 
@@ -61,67 +62,23 @@ public class DetailsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_details,container,false);
 
-        final Bundle bundle = this.getArguments();
-        mSteps = bundle.getParcelableArrayList("Steps");
-
-        position = bundle.getInt("Position");
-        String desc = mSteps.get(position).getDesc();
-        String videoUrl = mSteps.get(position).getVideoUrl();
-        String photoUrl = mSteps.get(position).getThumbnailUrl();
-        mPlayerView = rootView.findViewById(R.id.exoplayer);
-        ImageView recipeImage = rootView.findViewById(R.id.recipe_image);
-        if(TextUtils.isEmpty(videoUrl)) {
-            mPlayerView.setVisibility(View.GONE);
-            recipeImage.setVisibility(View.VISIBLE);
-            if(!TextUtils.isEmpty(photoUrl)){
-                    Glide.with(getContext())
-                            .load(photoUrl)
-                            .into(recipeImage);
+        if(getArguments()!=null){
+            Bundle bundle = this.getArguments();
+            mSteps = bundle.getParcelableArrayList("Steps");
+            mMoving = bundle.getBoolean("Moving");
+            if(mMoving){
+                mPlayerPosition = 0;
             }
-            else {
-                    Glide.with(getContext())
-                            .load(R.drawable.oven)
-                            .into(recipeImage);
+            else{
+                mPlayerPosition = bundle.getLong("PlayerPosition");
             }
-        }
-        TextView stepDesc = rootView.findViewById(R.id.step_description);
-        stepDesc.setText(desc);
-
-        final ViewPager mViewPager = getActivity().findViewById(R.id.pager);
-
-        ImageButton prev = rootView.findViewById(R.id.button_prev);
-        ImageButton next = rootView.findViewById(R.id.button_next);
-
-        if(position == 0){
-            prev.setVisibility(View.INVISIBLE);
+            mFragmentPosition = bundle.getInt("FragmentPosition");
+            Log.d(TAG,"GetArguments()\nPlayer pos = " + mPlayerPosition + "\nFragment pos = " + mFragmentPosition + "\nMoving = " + mMoving);
         }
 
-        if(position == mSteps.size()-1){
-            next.setVisibility(View.INVISIBLE);
-        }
-
-        prev.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int pos = bundle.getInt("Position");
-                mViewPager.setCurrentItem(pos-1,true);
-            }
-        });
-
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int pos = bundle.getInt("Position");
-                mViewPager.setCurrentItem(pos+1,true);
-            }
-        });
-
-
-        if(savedInstanceState!=null){
-            mPlayerPosition = savedInstanceState.getLong("Seek");
-        }
-
-        initializePlayer(Uri.parse(mSteps.get(position).getVideoUrl()));
+        setViews(rootView);
+        setArrows(rootView);
+        initializePlayer(Uri.parse(mSteps.get(mFragmentPosition).getVideoUrl()));
 
         return rootView;
     }
@@ -131,13 +88,19 @@ public class DetailsFragment extends Fragment {
         super.onStart();
     }
 
-    public static DetailsFragment newInstance(ArrayList<Step> mSteps, int position){
+    public void changeFragment(){
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList("Steps",mSteps);
-        bundle.putInt("Position",position);
-        DetailsFragment detailsFragment = new DetailsFragment();
+        bundle.putInt("FragmentPosition",mFragmentPosition);
+        bundle.putLong("PlayerPosition",mPlayerPosition);
+        bundle.putBoolean("Moving",true);
+        detailsFragment = new DetailsFragment();
         detailsFragment.setArguments(bundle);
-        return detailsFragment;
+        if(getActivity()!=null)
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.details_frame, detailsFragment)
+                    .commit();
     }
 
     private void initializePlayer(Uri mediaUri){
@@ -152,23 +115,19 @@ public class DetailsFragment extends Fragment {
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(render,defaultTrackSelector,loadControl);
             mPlayerView.requestFocus();
             mPlayerView.setPlayer(mExoPlayer);
-            if(mPlayerPosition != -1){
-                mExoPlayer.seekTo(mPlayerPosition);
-            }
-            else{
-                mExoPlayer.seekTo(0);
-            }
 
             DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter();
             DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
-                    Util.getUserAgent(getContext(), "yourApplicationName"), defaultBandwidthMeter);
+                    Util.getUserAgent(getContext(), "BakingTime"), defaultBandwidthMeter);
             MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaUri);
 
-            mExoPlayer.prepare(videoSource);
+            if(mPlayerPosition != -1){
+                mExoPlayer.seekTo(mPlayerPosition);
+            }
+            mExoPlayer.prepare(videoSource,false,true);
             mExoPlayer.setPlayWhenReady(true);
             mPlayerView.hideController();
-
         }
     }
 
@@ -181,13 +140,82 @@ public class DetailsFragment extends Fragment {
         mExoPlayer = null;
     }
 
+    private void setViews(View rootView){
+        String desc = mSteps.get(mFragmentPosition).getDesc();
+        String videoUrl = mSteps.get(mFragmentPosition).getVideoUrl();
+        String photoUrl = mSteps.get(mFragmentPosition).getThumbnailUrl();
+        mPlayerView = rootView.findViewById(R.id.exoplayer);
+        ImageView recipeImage = rootView.findViewById(R.id.recipe_image);
+        if(TextUtils.isEmpty(videoUrl)) {
+            mPlayerView.setVisibility(View.GONE);
+            recipeImage.setVisibility(View.VISIBLE);
+            if(!TextUtils.isEmpty(photoUrl)){
+                Glide.with(getContext())
+                        .load(photoUrl)
+                        .into(recipeImage);
+            }
+            else {
+                Glide.with(getContext())
+                        .load(R.drawable.oven)
+                        .into(recipeImage);
+            }
+        }
+        TextView stepDesc = rootView.findViewById(R.id.step_description);
+        stepDesc.setText(desc);
+    }
+
+    private void setArrows(View rootView){
+        ImageButton prev = rootView.findViewById(R.id.button_prev);
+        ImageButton next = rootView.findViewById(R.id.button_next);
+
+        if(mFragmentPosition == 0){
+            prev.setVisibility(View.INVISIBLE);
+        }
+
+        if(mFragmentPosition == mSteps.size()-1){
+            next.setVisibility(View.INVISIBLE);
+        }
+
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mFragmentPosition--;
+                changeFragment();
+            }
+        });
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ++mFragmentPosition;
+                changeFragment();
+            }
+        });
+    }
+
+    public Bundle getState(){
+        Bundle bundle = new Bundle();
+        bundle.putLong("PlayerPosition",mPlayerPosition);
+        bundle.putInt("FragmentPosition",mFragmentPosition);
+        bundle.putParcelableArrayList("Steps",mSteps);
+        bundle.putBoolean("Moving",false);
+        return bundle;
+    }
+
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStop() {
+        super.onStop();
+        if(Util.SDK_INT > 23)
+            releasePlayer();
     }
 
     @Override
     public void onPause() {
+        if(mExoPlayer!=null){
+            mPlayerPosition = mExoPlayer.getCurrentPosition();
+        }
+        if(getActivity()!=null)
+            getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
         super.onPause();
         if(Util.SDK_INT <= 23){
             releasePlayer();
@@ -195,33 +223,8 @@ public class DetailsFragment extends Fragment {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if(Util.SDK_INT > 23){
-            releasePlayer();
-        }
+    public void onResume() {
+        super.onResume();
+        initializePlayer(Uri.parse(mSteps.get(mFragmentPosition).getVideoUrl()));
     }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(this.isVisible()){
-            if(!isVisibleToUser)
-                mExoPlayer.stop();
-            else
-                mExoPlayer.setPlayWhenReady(true);
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if(mExoPlayer!=null && mExoPlayer.getPlayWhenReady()) {
-            mPlayerPosition = mExoPlayer.getCurrentPosition();
-            Log.d(TAG,"Player position onSaveInstanceState = " + mPlayerPosition);
-            mExoPlayer.setPlayWhenReady(false);
-            outState.putLong("Seek",mPlayerPosition);
-        }
-    }
-
 }

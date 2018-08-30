@@ -1,36 +1,42 @@
 package com.pshkrh.bakingtime.Activity;
 
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
-import com.pshkrh.bakingtime.Adapter.CustomPagerAdapter;
+import com.pshkrh.bakingtime.Fragment.DetailsFragment;
 import com.pshkrh.bakingtime.R;
 
 public class DetailsActivity extends AppCompatActivity {
 
-    private ViewPager mViewPager;
-    private CustomPagerAdapter mCustomPagerAdapter;
+    private DetailsFragment detailsFragment = new DetailsFragment();
+    private static final String TAG = "DetailsActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         ActionBar actionBar = getSupportActionBar();
-        if(actionBar!=null){
+        if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        Bundle bundle = getIntent().getExtras();
-        int scrollPosition = bundle.getInt("Position");
-
-        mViewPager = findViewById(R.id.pager);
-        mCustomPagerAdapter = new CustomPagerAdapter(getSupportFragmentManager(),bundle);
-
-        mViewPager.setAdapter(mCustomPagerAdapter);
-        mViewPager.setCurrentItem(scrollPosition);
-        mViewPager.setOffscreenPageLimit(2);
+        if(savedInstanceState!=null){
+            Log.d(TAG,"SavedInstanceState found in onCreate of DetailsActivity");
+            Bundle saveState = savedInstanceState.getBundle("SavedState");
+            detailsFragment.setArguments(saveState);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.details_frame, detailsFragment)
+                    .commit();
+        }
+        else{
+            Bundle bundle = getIntent().getExtras();
+            detailsFragment.setArguments(bundle);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.details_frame, detailsFragment)
+                    .commit();
+        }
     }
 
     @Override
@@ -49,6 +55,14 @@ public class DetailsActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        //getSupportFragmentManager().beginTransaction().remove(detailsFragment).commit();
         super.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG,"onSaveInstanceState called in Activity");
+        outState.putBundle("SavedState",detailsFragment.getState());
     }
 }
