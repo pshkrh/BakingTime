@@ -206,6 +206,7 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        Log.d(TAG,"onPause() called");
         mMoving = false;
         if(mExoPlayer!=null){
             mPlayerPosition = mExoPlayer.getCurrentPosition();
@@ -220,10 +221,10 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        initializePlayer(Uri.parse(mSteps.get(mFragmentPosition).getVideoUrl()));
+        Log.d(TAG,"onResume() called");
         if(getView()!=null) {
-            TextView desc = getView().findViewById(R.id.step_description);
-            desc.setText(mSteps.get(mFragmentPosition).getDesc());
+            setLayout(getView());
+            initializePlayer(Uri.parse(mSteps.get(mFragmentPosition).getVideoUrl()));
         }
     }
 }
