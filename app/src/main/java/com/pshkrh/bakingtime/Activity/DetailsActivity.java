@@ -26,7 +26,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     public ArrayList<Step> mSteps = new ArrayList<>();
 
-    int currentStep = 0;
+    public int currentStep = 0;
     private DetailsFragment detailsFragment;
 
     @Override
