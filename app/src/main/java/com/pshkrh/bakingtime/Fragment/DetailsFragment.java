@@ -1,5 +1,6 @@
 package com.pshkrh.bakingtime.Fragment;
 
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -100,7 +101,11 @@ public class DetailsFragment extends Fragment {
         }
 
         TextView stepDesc = rootView.findViewById(R.id.step_description);
-        stepDesc.setText(desc);
+
+        if(isLandscape())
+            stepDesc.setVisibility(View.GONE);
+        else
+            stepDesc.setText(desc);
     }
 
     private void initializePlayer(Uri mediaUri, Bundle savedInstanceState) {
@@ -136,6 +141,14 @@ public class DetailsFragment extends Fragment {
             mExoPlayer.release();
         }
         mExoPlayer = null;
+    }
+
+    private boolean isLandscape(){
+        int orientation = getResources().getConfiguration().orientation;
+        if(orientation == Configuration.ORIENTATION_LANDSCAPE){
+            return true;
+        }
+        else return false;
     }
 
     @Override
