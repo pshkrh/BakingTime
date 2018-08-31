@@ -11,7 +11,7 @@ import com.pshkrh.bakingtime.R;
 
 public class DetailsActivity extends AppCompatActivity {
 
-    private DetailsFragment detailsFragment = new DetailsFragment();
+    private DetailsFragment detailsFragment;
     private static final String TAG = "DetailsActivity";
 
     @Override
@@ -24,17 +24,25 @@ public class DetailsActivity extends AppCompatActivity {
         }
         if(savedInstanceState!=null){
             Log.d(TAG,"SavedInstanceState found in onCreate of DetailsActivity");
+            detailsFragment = (DetailsFragment)getSupportFragmentManager().findFragmentByTag(DetailsFragment.FRAGMENT_TAG);
+            if(detailsFragment==null){
+                detailsFragment = new DetailsFragment();
+                Log.d(TAG,"New Details Fragment Created");
+            }
             Bundle saveState = savedInstanceState.getBundle("SavedState");
             detailsFragment.setArguments(saveState);
+            detailsFragment.setRetainInstance(true);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.details_frame, detailsFragment)
+                    .replace(R.id.details_frame, detailsFragment,DetailsFragment.FRAGMENT_TAG)
                     .commit();
         }
         else{
             Bundle bundle = getIntent().getExtras();
+            detailsFragment = new DetailsFragment();
             detailsFragment.setArguments(bundle);
+            detailsFragment.setRetainInstance(true);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.details_frame, detailsFragment)
+                    .add(R.id.details_frame, detailsFragment,DetailsFragment.FRAGMENT_TAG)
                     .commit();
         }
     }
@@ -61,8 +69,17 @@ public class DetailsActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         Log.d(TAG,"onSaveInstanceState called in Activity");
-        outState.putBundle("SavedState",detailsFragment.getState());
+        //Bundle logBundle = detailsFragment.getState();
+        Bundle logBundle = new Bundle();
+        logBundle.putParcelableArrayList("Steps",DetailsFragment.mSteps);
+        logBundle.putLong("PlayerPosition",DetailsFragment.mPlayerPosition);
+        logBundle.putInt("FragmentPosition",DetailsFragment.mFragmentPosition);
+        logBundle.putBoolean("Moving",DetailsFragment.mMoving);
+        Log.d(TAG,"LOG BUNDLE\n" + "Player Position = " + logBundle.getLong("PlayerPosition") +
+                    "\nFragment Position = " + logBundle.getInt("FragmentPosition"));
+        //outState.putBundle("SavedState",detailsFragment.getState());
+        outState.putBundle("SavedState",logBundle);
+        super.onSaveInstanceState(outState);
     }
 }
