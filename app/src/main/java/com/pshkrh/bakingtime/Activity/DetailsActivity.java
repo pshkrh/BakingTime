@@ -1,18 +1,33 @@
 package com.pshkrh.bakingtime.Activity;
 
+import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 
 import com.pshkrh.bakingtime.Fragment.DetailsFragment;
+import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
+
+import java.util.ArrayList;
 
 public class DetailsActivity extends AppCompatActivity {
 
-    private DetailsFragment detailsFragment;
     private static final String TAG = "DetailsActivity";
+    private static final String FRAGMENT_POSITION = "FragmentPosition";
+    private static final String STEPS = "Steps";
+    private static final String CURRENT_STEP = "currentStep";
+
+    public ArrayList<Step> mSteps = new ArrayList<>();
+
+    int currentStep = 0;
+    private DetailsFragment detailsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,78 +37,66 @@ public class DetailsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        if(savedInstanceState!=null){
-            Log.d(TAG,"SavedInstanceState found in onCreate of DetailsActivity");
-            detailsFragment = (DetailsFragment)getSupportFragmentManager().findFragmentByTag(DetailsFragment.FRAGMENT_TAG);
-            if(detailsFragment==null){
-                detailsFragment = new DetailsFragment();
-                Log.d(TAG,"New Details Fragment Created");
+
+        mSteps = getIntent().getParcelableArrayListExtra(STEPS);
+        currentStep = getIntent().getIntExtra(FRAGMENT_POSITION, 0);
+        if (savedInstanceState != null) {
+            currentStep = savedInstanceState.getInt(CURRENT_STEP);
+        }
+
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0)
+            inflateFragment();
+
+        ImageButton prev = findViewById(R.id.button_prev);
+        ImageButton next = findViewById(R.id.button_next);
+
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentStep == 0) {
+                    return;
+                }
+                currentStep--;
+                inflateFragment();
             }
-            Bundle saveState = savedInstanceState.getBundle("SavedState");
-            detailsFragment.setArguments(saveState);
-            detailsFragment.setRetainInstance(true);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.details_frame, detailsFragment,DetailsFragment.FRAGMENT_TAG)
-                    .commit();
-        }
-        else{
-            Bundle bundle = getIntent().getExtras();
-            detailsFragment = new DetailsFragment();
-            detailsFragment.setArguments(bundle);
-            detailsFragment.setRetainInstance(true);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.details_frame, detailsFragment,DetailsFragment.FRAGMENT_TAG)
-                    .commit();
-        }
+        });
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentStep == mSteps.size() - 1) {
+                    return;
+                }
+                currentStep++;
+                inflateFragment();
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        finish();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public void inflateFragment() {
 
-        if(item.getItemId() == android.R.id.home) {
-            finish();
-        }
-        return super.onOptionsItemSelected(item);
-    }
+        getSupportFragmentManager().popBackStackImmediate();
 
-    @Override
-    protected void onPause() {
-        //getSupportFragmentManager().beginTransaction().remove(detailsFragment).commit();
-        super.onPause();
+        detailsFragment = DetailsFragment.newInstance(mSteps.get(currentStep).getVideoUrl()
+                , mSteps.get(currentStep).getThumbnailUrl()
+                , mSteps.get(currentStep).getDesc()
+        );
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.details_frame, detailsFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d(TAG,"onSaveInstanceState called in Activity");
-        //Bundle logBundle = detailsFragment.getState();
-        Bundle logBundle = new Bundle();
-        logBundle.putParcelableArrayList("Steps",DetailsFragment.mSteps);
-        logBundle.putLong("PlayerPosition",DetailsFragment.mPlayerPosition);
-        logBundle.putInt("FragmentPosition",DetailsFragment.mFragmentPosition);
-        logBundle.putBoolean("Moving",DetailsFragment.mMoving);
-        Log.d(TAG,"LOG BUNDLE\n" + "Player Position = " + logBundle.getLong("PlayerPosition") +
-                    "\nFragment Position = " + logBundle.getInt("FragmentPosition"));
-        //outState.putBundle("SavedState",detailsFragment.getState());
-        outState.putBundle("SavedState",logBundle);
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Bundle restoredBundle = savedInstanceState.getBundle("SavedState");
-        DetailsFragment detailsFragment = (DetailsFragment)getSupportFragmentManager().findFragmentByTag(DetailsFragment.FRAGMENT_TAG);
-        if(detailsFragment==null){
-            detailsFragment = new DetailsFragment();
-            detailsFragment.setArguments(restoredBundle);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.details_frame,detailsFragment,DetailsFragment.FRAGMENT_TAG)
-                    .commit();
-        }
-        super.onRestoreInstanceState(savedInstanceState);
+        outState.putInt(CURRENT_STEP, currentStep);
     }
 }
