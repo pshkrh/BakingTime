@@ -76,8 +76,7 @@ public class DetailsFragment extends Fragment {
             Log.d(TAG,"GetArguments()\nPlayer pos = " + mPlayerPosition + "\nFragment pos = " + mFragmentPosition + "\nMoving = " + mMoving);
         }
 
-        setViews(rootView);
-        setArrows(rootView);
+        setLayout(rootView);
         initializePlayer(Uri.parse(mSteps.get(mFragmentPosition).getVideoUrl()));
 
         return rootView;
@@ -140,7 +139,7 @@ public class DetailsFragment extends Fragment {
         mExoPlayer = null;
     }
 
-    private void setViews(View rootView){
+    private void setLayout(View rootView){
         String desc = mSteps.get(mFragmentPosition).getDesc();
         String videoUrl = mSteps.get(mFragmentPosition).getVideoUrl();
         String photoUrl = mSteps.get(mFragmentPosition).getThumbnailUrl();
@@ -162,9 +161,7 @@ public class DetailsFragment extends Fragment {
         }
         TextView stepDesc = rootView.findViewById(R.id.step_description);
         stepDesc.setText(desc);
-    }
 
-    private void setArrows(View rootView){
         ImageButton prev = rootView.findViewById(R.id.button_prev);
         ImageButton next = rootView.findViewById(R.id.button_next);
 
