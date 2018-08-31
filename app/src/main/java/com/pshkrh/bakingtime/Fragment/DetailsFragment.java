@@ -45,15 +45,18 @@ import java.util.ArrayList;
 
 public class DetailsFragment extends Fragment {
 
-    public ArrayList<Step> mSteps = new ArrayList<>();
+    public static ArrayList<Step> mSteps = new ArrayList<>();
 
     private static final String TAG = "DetailsFragment";
+    public static final String FRAGMENT_TAG = "DF";
+
     private SimpleExoPlayer mExoPlayer;
     private PlayerView mPlayerView;
-    private long mPlayerPosition = -1;
-    private int mFragmentPosition = 0;
-    private boolean mMoving;
-    private DetailsFragment detailsFragment;
+    public static long mPlayerPosition = -1;
+    public static int mFragmentPosition = 0;
+    public static boolean mMoving;
+    public DetailsFragment detailsFragment;
+
 
     public DetailsFragment(){}
 
@@ -85,21 +88,6 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-    }
-
-    public void changeFragment(){
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList("Steps",mSteps);
-        bundle.putInt("FragmentPosition",mFragmentPosition);
-        bundle.putLong("PlayerPosition",mPlayerPosition);
-        bundle.putBoolean("Moving",true);
-        detailsFragment = new DetailsFragment();
-        detailsFragment.setArguments(bundle);
-        if(getActivity()!=null)
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.details_frame, detailsFragment)
-                    .commit();
     }
 
     private void initializePlayer(Uri mediaUri){
@@ -137,6 +125,22 @@ public class DetailsFragment extends Fragment {
             mExoPlayer.release();
         }
         mExoPlayer = null;
+    }
+
+    public void changeFragment(){
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList("Steps",mSteps);
+        bundle.putInt("FragmentPosition",mFragmentPosition);
+        bundle.putLong("PlayerPosition",mPlayerPosition);
+        bundle.putBoolean("Moving",mMoving);
+        detailsFragment = new DetailsFragment();
+        detailsFragment.setRetainInstance(true);
+        detailsFragment.setArguments(bundle);
+        if(getActivity()!=null)
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.details_frame, detailsFragment)
+                    .commit();
     }
 
     private void setLayout(View rootView){
@@ -177,6 +181,7 @@ public class DetailsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 mFragmentPosition--;
+                mMoving = true;
                 changeFragment();
             }
         });
@@ -184,19 +189,11 @@ public class DetailsFragment extends Fragment {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ++mFragmentPosition;
+                mFragmentPosition++;
+                mMoving = true;
                 changeFragment();
             }
         });
-    }
-
-    public Bundle getState(){
-        Bundle bundle = new Bundle();
-        bundle.putLong("PlayerPosition",mPlayerPosition);
-        bundle.putInt("FragmentPosition",mFragmentPosition);
-        bundle.putParcelableArrayList("Steps",mSteps);
-        bundle.putBoolean("Moving",false);
-        return bundle;
     }
 
     @Override
@@ -208,12 +205,13 @@ public class DetailsFragment extends Fragment {
 
     @Override
     public void onPause() {
+        super.onPause();
+        mMoving = false;
         if(mExoPlayer!=null){
             mPlayerPosition = mExoPlayer.getCurrentPosition();
         }
         if(getActivity()!=null)
             getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
-        super.onPause();
         if(Util.SDK_INT <= 23){
             releasePlayer();
         }
@@ -223,5 +221,9 @@ public class DetailsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         initializePlayer(Uri.parse(mSteps.get(mFragmentPosition).getVideoUrl()));
+        if(getView()!=null) {
+            TextView desc = getView().findViewById(R.id.step_description);
+            desc.setText(mSteps.get(mFragmentPosition).getDesc());
+        }
     }
 }
