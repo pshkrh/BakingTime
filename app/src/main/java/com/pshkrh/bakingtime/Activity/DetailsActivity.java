@@ -82,4 +82,18 @@ public class DetailsActivity extends AppCompatActivity {
         outState.putBundle("SavedState",logBundle);
         super.onSaveInstanceState(outState);
     }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Bundle restoredBundle = savedInstanceState.getBundle("SavedState");
+        DetailsFragment detailsFragment = (DetailsFragment)getSupportFragmentManager().findFragmentByTag(DetailsFragment.FRAGMENT_TAG);
+        if(detailsFragment==null){
+            detailsFragment = new DetailsFragment();
+            detailsFragment.setArguments(restoredBundle);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.details_frame,detailsFragment,DetailsFragment.FRAGMENT_TAG)
+                    .commit();
+        }
+        super.onRestoreInstanceState(savedInstanceState);
+    }
 }
