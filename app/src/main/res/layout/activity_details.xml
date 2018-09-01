@@ -26,7 +26,7 @@
         android:padding="16dp"
         android:src="@drawable/arrow_right_thick" />
     <FrameLayout
-        android:id="@+id/details_frame"
+        android:id="@+id/details_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </RelativeLayout>

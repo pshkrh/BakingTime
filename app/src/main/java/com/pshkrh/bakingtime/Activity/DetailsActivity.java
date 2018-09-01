@@ -89,7 +89,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.details_frame, detailsFragment)
+                .replace(R.id.details_container, detailsFragment)
                 .addToBackStack(null)
                 .commit();
     }
