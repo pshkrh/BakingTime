@@ -34,6 +34,12 @@ import java.util.ArrayList;
 public class RecipeFragment extends Fragment implements StepListAdapter.OnStepClickListener{
 
     public static final String TAG = "RecipeFragment";
+    private static final String FRAGMENT_POSITION = "FragmentPosition";
+    private static final String STEPS = "Steps";
+    private static final String FLAG = "Flag";
+    private static final String INGREDIENTS = "Ingredients";
+    private static final String TWO_PANE = "TwoPane";
+
     private ArrayList<Ingredient> mIngredients = new ArrayList<>();
     private ArrayList<Step> mSteps = new ArrayList<>();
 
@@ -48,9 +54,10 @@ public class RecipeFragment extends Fragment implements StepListAdapter.OnStepCl
         View rootView = inflater.inflate(R.layout.fragment_recipes,container,false);
         try{
             Bundle bundle = this.getArguments();
-
-            mIngredients = bundle.getParcelableArrayList("Ingredients");
-            mSteps = bundle.getParcelableArrayList("Steps");
+            if(bundle!=null) {
+                mIngredients = bundle.getParcelableArrayList(INGREDIENTS);
+                mSteps = bundle.getParcelableArrayList(STEPS);
+            }
 
             // RecyclerView setup
 
@@ -92,13 +99,27 @@ public class RecipeFragment extends Fragment implements StepListAdapter.OnStepCl
     @Override
     public void onStepSelected(View view, int position) {
         //Toast.makeText(getActivity(), "Position = " + position, Toast.LENGTH_SHORT).show();
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList("Steps",mSteps);
-        bundle.putInt("FragmentPosition",position);
-        Intent intent = new Intent(getActivity(), DetailsActivity.class);
-        intent.putExtras(bundle);
-        intent.putExtra("Flag",1);
-        startActivity(intent);
+        if(getArguments().getBoolean(TWO_PANE)){
+            DetailsFragment detailsFragment = DetailsFragment.newInstance(mSteps.get(position).getVideoUrl()
+                    ,mSteps.get(position).getThumbnailUrl()
+                    ,mSteps.get(position).getDesc());
+
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.details_container, detailsFragment)
+                    .addToBackStack(null)
+                    .commit();
+            Log.d(TAG,"Two Pane = True!");
+        }
+        else {
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList(STEPS, mSteps);
+            bundle.putInt(FRAGMENT_POSITION, position);
+            Intent intent = new Intent(getActivity(), DetailsActivity.class);
+            intent.putExtras(bundle);
+            intent.putExtra(FLAG, 1);
+            startActivity(intent);
+        }
     }
 
 }

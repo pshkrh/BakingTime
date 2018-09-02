@@ -41,6 +41,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.pshkrh.bakingtime.Activity.RecipeActivity;
 import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
 
@@ -100,12 +101,8 @@ public class DetailsFragment extends Fragment {
                     .into(recipeImage);
         }
 
-        TextView stepDesc = rootView.findViewById(R.id.step_description);
+        checkConfig(rootView);
 
-        if(isLandscape())
-            stepDesc.setVisibility(View.GONE);
-        else
-            stepDesc.setText(desc);
     }
 
     private void initializePlayer(Uri mediaUri, Bundle savedInstanceState) {
@@ -149,6 +146,19 @@ public class DetailsFragment extends Fragment {
             return true;
         }
         else return false;
+    }
+
+    private boolean isTablet(){
+        return RecipeActivity.mTwoPane;
+    }
+
+    private void checkConfig(View rootView){
+        TextView stepDesc = rootView.findViewById(R.id.step_description);
+
+        if(isLandscape() && !isTablet())
+            stepDesc.setVisibility(View.GONE);
+        else if(isLandscape() && isTablet() || !isLandscape() && !isTablet() || !isLandscape() && isTablet())
+            stepDesc.setText(desc);
     }
 
     @Override
