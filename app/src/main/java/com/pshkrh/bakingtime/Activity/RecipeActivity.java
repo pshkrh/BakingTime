@@ -42,15 +42,17 @@ public class RecipeActivity extends AppCompatActivity {
         if(getSupportActionBar()!=null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        RecipeFragment recipeFragment = new RecipeFragment();
-        Bundle bundle = getIntent().getBundleExtra(ING_STEP_BUNDLE);
-        bundle.putBoolean(TWO_PANE,mTwoPane);
-        recipeFragment.setArguments(bundle);
-        mIngredients = bundle.getParcelableArrayList(INGREDIENTS);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .add(R.id.recipe_container,recipeFragment)
-                .commit();
+        if(savedInstanceState==null){
+            RecipeFragment recipeFragment = new RecipeFragment();
+            Bundle bundle = getIntent().getBundleExtra(ING_STEP_BUNDLE);
+            bundle.putBoolean(TWO_PANE,mTwoPane);
+            recipeFragment.setArguments(bundle);
+            mIngredients = bundle.getParcelableArrayList(INGREDIENTS);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .add(R.id.recipe_container,recipeFragment)
+                    .commit();
+        }
 
         if(findViewById(R.id.details_container)!=null){
             mTwoPane = true;
