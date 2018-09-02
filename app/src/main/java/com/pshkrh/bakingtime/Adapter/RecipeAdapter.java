@@ -7,8 +7,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.pshkrh.bakingtime.Model.Ingredient;
 import com.pshkrh.bakingtime.Model.Recipe;
 import com.pshkrh.bakingtime.Model.Step;
@@ -21,11 +23,13 @@ public class RecipeAdapter extends
         RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView nameTextView;
+        private TextView nameTextView;
+        private ImageView pictureImageView;
 
-        public ViewHolder(View itemView) {
+        private ViewHolder(View itemView) {
             super(itemView);
-            nameTextView = (TextView) itemView.findViewById(R.id.recipe_name);
+            nameTextView = itemView.findViewById(R.id.recipe_name);
+            pictureImageView = itemView.findViewById(R.id.recipe_pic);
             itemView.setOnClickListener(this);
         }
 
@@ -77,6 +81,39 @@ public class RecipeAdapter extends
         // Set item views based on your views and data model
         TextView textView = viewHolder.nameTextView;
         textView.setText(recipe.getName());
+
+        int recipeId = mRecipes.get(position).getId();
+        Context context = viewHolder.itemView.getContext();
+
+        switch(recipeId){
+            // Nutella Pie
+            case 1:
+                Glide.with(context)
+                        .load(R.drawable.nutella_pie)
+                        .into(viewHolder.pictureImageView);
+                break;
+
+            // Brownies
+            case 2:
+                Glide.with(context)
+                        .load(R.drawable.brownie)
+                        .into(viewHolder.pictureImageView);
+                break;
+
+            // Yellow Cake
+            case 3:
+                Glide.with(context)
+                        .load(R.drawable.yellowcake)
+                        .into(viewHolder.pictureImageView);
+                break;
+
+            // Cheesecake
+            case 4:
+                Glide.with(context)
+                        .load(R.drawable.cheesecake)
+                        .into(viewHolder.pictureImageView);
+                break;
+        }
     }
 
     // Returns the total count of items in the list
