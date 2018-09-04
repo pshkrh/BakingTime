@@ -2,7 +2,7 @@
 Final Project for the Udacity Android Developer - I Nanodegree
 
 
-#Attribution Details
+# Attribution Details
 Stack Overflow forums have been very useful in implementing ExoPlayer and for Fragments.
 
 Thanks to the Mentor on Slack for valuable advice and bug fixing help.
