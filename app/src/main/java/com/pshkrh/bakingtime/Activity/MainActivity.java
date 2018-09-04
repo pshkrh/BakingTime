@@ -3,12 +3,14 @@ package com.pshkrh.bakingtime.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +24,9 @@ import com.pshkrh.bakingtime.Model.Recipe;
 import com.pshkrh.bakingtime.Model.Step;
 import com.pshkrh.bakingtime.R;
 
+import android.support.test.espresso.IdlingResource;
+import com.pshkrh.bakingtime.IdlingResource.BakingIdlingResource;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String RECIPE_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
     public static final String TAG = "MainActivity";
+
+    @Nullable private BakingIdlingResource mIdlingResource;
 
     public ArrayList<Recipe> mRecipes = new ArrayList<>();
     public ArrayList<Ingredient> mIngredients = new ArrayList<>();
@@ -50,10 +57,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mCoordinatorLayout = findViewById(R.id.main_layout);
         mProgressBar = findViewById(R.id.progress_bar);
+        recyclerView = findViewById(R.id.main_recycler);
 
         loadRecipes(RECIPE_URL);
-
-        recyclerView = findViewById(R.id.main_recycler);
         RecipeAdapter recipeAdapter = new RecipeAdapter(mRecipes);
         recyclerView.setAdapter(recipeAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this,2));
@@ -143,5 +149,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new BakingIdlingResource();
+        }
+        return mIdlingResource;
+    }
 
 }
