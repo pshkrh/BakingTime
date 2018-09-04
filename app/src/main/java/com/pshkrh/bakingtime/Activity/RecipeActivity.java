@@ -34,6 +34,7 @@ public class RecipeActivity extends AppCompatActivity {
     public ArrayList<Step> mSteps = new ArrayList<>();
 
     public static boolean mTwoPane;
+    public static int ingredientListSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,8 @@ public class RecipeActivity extends AppCompatActivity {
                     .add(R.id.recipe_container,recipeFragment)
                     .commit();
         }
+
+        ingredientListSize = mIngredients.size();
 
         if(findViewById(R.id.details_container)!=null){
             mTwoPane = true;
